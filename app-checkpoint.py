@@ -1,0 +1,47 @@
+import streamlit as st
+import numpy as np
+import pickle
+
+background_image = "url(data:image/jpeg;base64,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)"  # Replace with your image URL
+
+# Add the background image and font color to the page using CSS
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background-image: {background_image};
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 100vh;
+        color: red;  /* Set the font color to blue */
+    }}
+    h1, h2, h3, h4, h5, h6 {{
+        color: blue;  /* Apply blue color to headings */
+    }}
+    </style>
+    """, unsafe_allow_html=True
+)
+
+pickle_in = open("classifier.pkl", "rb")
+classifier = pickle.load(pickle_in)
+
+def predict_heart_disease(age, Sex_male, cigsPerDay, totChol, sysBP, glucose):
+    prediction = classifier.predict([[age, Sex_male, cigsPerDay, totChol, sysBP, glucose]])
+    return prediction[0]
+
+st.title("Heart Disease Prediction")
+
+age = st.number_input("Age", min_value=1, max_value=120, value=30, step=1)
+Sex_male = st.radio("Sex", [0, 1], format_func=lambda x: "Female" if x == 0 else "Male")
+cigsPerDay = st.number_input("Cigarettes Per Day", min_value=0.0, value=0.0, step=1.0)
+totChol = st.number_input("Total Cholesterol", min_value=0.0, value=200.0, step=1.0)
+sysBP = st.number_input("Systolic Blood Pressure", min_value=50.0, value=120.0, step=1.0)
+glucose = st.number_input("Glucose Level", min_value=50.0, value=100.0, step=1.0)
+
+if st.button("Predict"):
+    st.session_state.sysBP = sysBP
+    st.switch_page("pages/Result_page.py")  # ✅ Corrected path
+    
+st.sidebar.title("📌 Abstract")
+st.sidebar.page_link("pages/about.py", label="ℹ️ About", icon="ℹ️")
